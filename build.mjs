@@ -3,6 +3,7 @@
 import { readFile, writeFile, mkdir, copyFile, cp } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import sharp from 'sharp';
 
 import { readFolderCatalogs } from './folder-catalogs.mjs';
 
@@ -50,7 +51,13 @@ export async function build(source, output = path.join(source, 'public')) {
   for (const entry of entries) {
     const destination = path.join(output, ...entry.image.split('/').map(decodeURIComponent));
     await mkdir(path.dirname(destination), { recursive: true });
-    await copyFile(entry.sourceImage, destination);
+    if (layout.coverSize) {
+      await sharp(entry.sourceImage)
+        .resize(layout.coverSize.width, layout.coverSize.height, { fit: 'cover', position: 'centre' })
+        .toFile(destination);
+    } else {
+      await copyFile(entry.sourceImage, destination);
+    }
   }
   return { sections: sections.length, catalogs: count, output };
 }

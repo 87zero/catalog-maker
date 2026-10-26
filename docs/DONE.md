@@ -14,3 +14,12 @@
   public (no customer content; lets any content repo's CI check it out
   without extra credentials) and confirmed it as the real engine behind
   `nichiyoh-catalog-contents`'s production deploy.
+- v2.0.0: added `sharp` (first npm dependency) and a `coverSize` option
+  in `original-layout.json` — cover images are center-cropped to a
+  configured pixel size at build time, since most card templates have
+  no `object-fit`/height CSS of their own and a mismatched cover breaks
+  the grid. Deduced Nichiyoh's spec (800×533) from its real covers.
+- v2.0.0: added `report.mjs` (`renderReportHTML` + CLI) producing a
+  static deployment-report page, for content repos to publish on every
+  deploy — including failed ones — per the house `/status` page
+  convention.

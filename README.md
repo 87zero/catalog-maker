@@ -2,8 +2,10 @@
 
 Generic engine that builds a static "catalog gateway" page from a company's
 own content: a page template, a layout file, and numbered catalog folders.
-It has no dependencies and no company-specific content — a customer's
-content repo checks it out at a pinned git ref and runs it in CI or locally.
+It has no company-specific content — a customer's content repo checks it
+out at a pinned git ref and runs it in CI or locally. Run `npm install`
+inside this checkout once before building or previewing (it depends on
+[`sharp`](https://sharp.pixelplumbing.com/) for cover-image resizing).
 
 ## What a content repo must provide
 
@@ -41,7 +43,8 @@ content repo checks it out at a pinned git ref and runs it in CI or locally.
   "heading": "<h2>{{TITLE}}</h2>",
   "sections": {},
   "cards": {},
-  "imageAliases": {}
+  "imageAliases": {},
+  "coverSize": { "width": 800, "height": 533 }
 }
 ```
 
@@ -52,6 +55,14 @@ content repo checks it out at a pinned git ref and runs it in CI or locally.
 specific sections or specific cover filenames (keyed by filename) when
 migrating an existing page, instead of falling back to the generic
 `defaultCard`/`row` layout for every entry.
+
+`coverSize` is optional. If set, every cover image is center-cropped to
+fill exactly that pixel size before being copied into the output — most
+card templates have no `object-fit`/`height` CSS of their own, so a cover
+with a different aspect ratio than the rest renders at a different height
+and breaks the grid. Deduce the right value from the company's own
+existing cover images (check their actual pixel dimensions) rather than
+guessing; leave `coverSize` unset to keep today's plain-copy behavior.
 
 ## Usage
 
@@ -85,6 +96,7 @@ Pin a release tag when checking out this repo, e.g.:
   with: { repository: 87zero/catalog-maker, ref: v1.0.0, path: catalog-maker }
 - uses: actions/checkout@v6
   with: { path: content }
+- run: npm ci --prefix catalog-maker
 - run: node catalog-maker/build.mjs --source content --output content/public
 ```
 

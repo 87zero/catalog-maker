@@ -1,8 +1,8 @@
 # Requirements: catalog-maker
 
 Generic, reusable engine for building a static "catalog gateway" page from a
-company's own content repo. Ships as a tagged Node.js tool with no npm
-dependencies; a customer's content repo checks it out at a pinned ref and
+company's own content repo. Ships as a tagged Node.js tool; a customer's
+content repo checks it out at a pinned ref, runs `npm install` once, and
 runs it in CI.
 
 ## Must
@@ -23,8 +23,14 @@ runs it in CI.
   directory, output directory) is a CLI argument or environment variable —
   nothing is hardcoded to a path relative to the script's own directory,
   since the engine runs against a different repo's checkout than its own.
-- Copy referenced assets (CSS/JS/fonts/images, cover images) into the
-  output directory unchanged.
+- Copy referenced assets (CSS/JS/fonts/images) into the output directory
+  unchanged. Cover images are copied unchanged unless the layout's
+  `coverSize` is set, in which case each is center-cropped to that exact
+  pixel size (most card templates have no `object-fit`/height CSS of
+  their own, so a mismatched cover breaks the grid).
+- Ship `report.mjs` (`renderReportHTML` + CLI) so a content repo can
+  publish a static deployment-report page on every deploy, including
+  failed ones, per the house `/status` page convention.
 - Ship a `serve.sh` that builds and serves the output on an automatically
   allocated loopback port, for local preview.
 - Ship generic regression tests (`node --test`), runnable without any
