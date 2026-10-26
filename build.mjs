@@ -51,16 +51,17 @@ export async function build(source, output = path.join(source, 'public')) {
   for (const entry of entries) {
     const destination = path.join(output, ...entry.image.split('/').map(decodeURIComponent));
     await mkdir(path.dirname(destination), { recursive: true });
-    if (layout.coverSize) {
+    const fitsAlready = !layout.coverSize || await (async () => {
+      const metadata = await sharp(entry.sourceImage).metadata();
+      return metadata.width <= layout.coverSize.width && metadata.height <= layout.coverSize.height;
+    })();
+    if (fitsAlready) {
+      await copyFile(entry.sourceImage, destination);
+    } else {
       await sharp(entry.sourceImage)
         .rotate()
-        .resize(layout.coverSize.width, layout.coverSize.height, {
-          fit: 'contain',
-          background: layout.coverSize.background || '#ffffff',
-        })
+        .resize(layout.coverSize.width, layout.coverSize.height, { fit: 'inside', withoutEnlargement: true })
         .toFile(destination);
-    } else {
-      await copyFile(entry.sourceImage, destination);
     }
   }
   return { sections: sections.length, catalogs: count, output };

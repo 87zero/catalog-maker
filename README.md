@@ -44,7 +44,7 @@ inside this checkout once before building or previewing (it depends on
   "sections": {},
   "cards": {},
   "imageAliases": {},
-  "coverSize": { "width": 800, "height": 533, "background": "#ffffff" }
+  "coverSize": { "width": 800, "height": 533 }
 }
 ```
 
@@ -56,15 +56,20 @@ specific sections or specific cover filenames (keyed by filename) when
 migrating an existing page, instead of falling back to the generic
 `defaultCard`/`row` layout for every entry.
 
-`coverSize` is optional. If set, every cover image is resized to fit
-*inside* that pixel box (shrinking as needed, never cropping) and padded
-with `background` (defaults to white) to reach the exact size — most card
-templates have no `object-fit`/`height` CSS of their own, so a cover with
-a different aspect ratio than the rest renders at a different height and
-breaks the grid. A cover whose own EXIF orientation says it's rotated is
-auto-rotated upright first. Deduce the right size from the company's own
-existing cover images (check their actual pixel dimensions) rather than
-guessing; leave `coverSize` unset to keep today's plain-copy behavior.
+`coverSize` is optional — a maximum, not a forced canvas size. A cover
+that already fits within those pixel dimensions is copied through
+completely untouched (no re-encoding, no quality loss). A cover larger
+than that in either dimension is scaled down to fit inside it, preserving
+its own aspect ratio exactly — **never cropped, never padded, never
+distorted**, so uploaded content is never destroyed or mutilated. A cover
+whose own EXIF orientation says it's rotated is auto-rotated upright
+first. This doesn't guarantee every card renders at the same height —
+most card templates have no `object-fit`/height CSS of their own, so an
+oddly-shaped cover (e.g. a square logo among landscape photos) still
+looks visually different in the grid, just never with lost content.
+Deduce the right size from the company's own existing cover images
+(check their actual pixel dimensions) rather than guessing; leave
+`coverSize` unset to keep today's plain-copy behavior for everything.
 
 ## Usage
 

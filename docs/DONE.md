@@ -31,3 +31,13 @@
   Also added `.rotate()` (EXIF auto-orientation) before resizing, a
   defensive fix for future phone-camera uploads even though it wasn't
   the cause here (the test image had no EXIF orientation tag).
+- v2.1.0: padding the logo to the full canvas still looked visually out
+  of place next to full-bleed photo covers (big white/colour bars around
+  a small icon) — reported from a live customer-demo screenshot.
+  `coverSize` is now a maximum, not a forced canvas: a cover that already
+  fits within it is copied through completely untouched (byte-identical,
+  no re-encoding); only an oversized cover gets scaled down to fit
+  inside, still never cropped or padded. Prioritizes "uploaded content is
+  never destroyed" over uniform card footprints, per explicit direction —
+  the test entry is meant to demonstrate exactly that to prospective
+  customers.
