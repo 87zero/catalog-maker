@@ -44,7 +44,7 @@ inside this checkout once before building or previewing (it depends on
   "sections": {},
   "cards": {},
   "imageAliases": {},
-  "coverSize": { "width": 800, "height": 533 }
+  "coverSize": { "width": 800, "height": 533, "background": "#ffffff" }
 }
 ```
 
@@ -56,11 +56,13 @@ specific sections or specific cover filenames (keyed by filename) when
 migrating an existing page, instead of falling back to the generic
 `defaultCard`/`row` layout for every entry.
 
-`coverSize` is optional. If set, every cover image is center-cropped to
-fill exactly that pixel size before being copied into the output — most
-card templates have no `object-fit`/`height` CSS of their own, so a cover
-with a different aspect ratio than the rest renders at a different height
-and breaks the grid. Deduce the right value from the company's own
+`coverSize` is optional. If set, every cover image is resized to fit
+*inside* that pixel box (shrinking as needed, never cropping) and padded
+with `background` (defaults to white) to reach the exact size — most card
+templates have no `object-fit`/`height` CSS of their own, so a cover with
+a different aspect ratio than the rest renders at a different height and
+breaks the grid. A cover whose own EXIF orientation says it's rotated is
+auto-rotated upright first. Deduce the right size from the company's own
 existing cover images (check their actual pixel dimensions) rather than
 guessing; leave `coverSize` unset to keep today's plain-copy behavior.
 

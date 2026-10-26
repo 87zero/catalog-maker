@@ -63,20 +63,33 @@ test('build renders the template, copies assets and copies catalog covers', () =
   }
 }));
 
-test('a configured coverSize crops every cover to fill the target dimensions', () => fixture(async root => {
+test('a configured coverSize pads every cover to the target dimensions without cropping it', () => fixture(async root => {
   const coverSize = { width: 800, height: 533 };
   await writeFile(path.join(root, 'original-layout.json'), JSON.stringify({ ...layout, coverSize }));
   const dir = path.join(root, 'catalogs', '01 Section', '01 Square');
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, 'link.txt'), 'https://example.com/square');
+  // A square source is taller than the 800x533 box relative to its width, so
+  // fitting it inside without cropping must shrink it and pad top/bottom.
   await sharp({ create: { width: 400, height: 400, channels: 3, background: { r: 10, g: 20, b: 30 } } })
     .png()
     .toFile(path.join(dir, 'cover.png'));
   const result = await build(root);
   const image = (await readFile(path.join(result.output, 'index.html'), 'utf8')).match(/src="(catalogs\/[^"]+)"/)[1];
-  const metadata = await sharp(path.join(result.output, decodeURIComponent(image))).metadata();
+  const outputPath = path.join(result.output, decodeURIComponent(image));
+  const metadata = await sharp(outputPath).metadata();
   assert.equal(metadata.width, coverSize.width);
   assert.equal(metadata.height, coverSize.height);
+  // The padded corner must be the background fill, not the source image's own colour.
+  const corner = await sharp(outputPath).extract({ left: 0, top: 0, width: 1, height: 1 }).raw().toBuffer();
+  assert.deepEqual([...corner], [255, 255, 255]);
+  // The source colour must still be present somewhere (nothing was cropped away).
+  const { data, info } = await sharp(outputPath).raw().toBuffer({ resolveWithObject: true });
+  let found = false;
+  for (let i = 0; i < data.length; i += info.channels) {
+    if (data[i] === 10 && data[i + 1] === 20 && data[i + 2] === 30) { found = true; break; }
+  }
+  assert.ok(found, 'expected the original source colour to still be present, unpadded');
 }));
 
 test('a missing cover fails before replacing existing output', () => fixture(async root => {

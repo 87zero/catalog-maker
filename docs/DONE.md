@@ -15,11 +15,19 @@
   without extra credentials) and confirmed it as the real engine behind
   `nichiyoh-catalog-contents`'s production deploy.
 - v2.0.0: added `sharp` (first npm dependency) and a `coverSize` option
-  in `original-layout.json` — cover images are center-cropped to a
-  configured pixel size at build time, since most card templates have
-  no `object-fit`/height CSS of their own and a mismatched cover breaks
-  the grid. Deduced Nichiyoh's spec (800×533) from its real covers.
+  in `original-layout.json` — cover images are resized to a configured
+  pixel size at build time, since most card templates have no
+  `object-fit`/height CSS of their own and a mismatched cover breaks the
+  grid. Deduced Nichiyoh's spec (800×533) from its real covers.
 - v2.0.0: added `report.mjs` (`renderReportHTML` + CLI) producing a
   static deployment-report page, for content repos to publish on every
   deploy — including failed ones — per the house `/status` page
   convention.
+- v2.0.1: the first `coverSize` implementation used `fit: 'cover'`
+  (center-crop to fill), which destroyed non-conforming uploads — a
+  400x400 square logo cropped to the 800x533 box lost its text and
+  clipped its circle. Switched to `fit: 'contain'` (shrink to fit inside,
+  pad with `background`, default white) so nothing is ever cropped away.
+  Also added `.rotate()` (EXIF auto-orientation) before resizing, a
+  defensive fix for future phone-camera uploads even though it wasn't
+  the cause here (the test image had no EXIF orientation tag).

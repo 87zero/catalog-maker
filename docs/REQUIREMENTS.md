@@ -25,9 +25,11 @@ runs it in CI.
   since the engine runs against a different repo's checkout than its own.
 - Copy referenced assets (CSS/JS/fonts/images) into the output directory
   unchanged. Cover images are copied unchanged unless the layout's
-  `coverSize` is set, in which case each is center-cropped to that exact
-  pixel size (most card templates have no `object-fit`/height CSS of
-  their own, so a mismatched cover breaks the grid).
+  `coverSize` is set, in which case each is auto-rotated upright (EXIF)
+  and resized to fit inside that exact pixel size without cropping,
+  padded with `background` (default white) to fill the rest (most card
+  templates have no `object-fit`/height CSS of their own, so a mismatched
+  cover breaks the grid).
 - Ship `report.mjs` (`renderReportHTML` + CLI) so a content repo can
   publish a static deployment-report page on every deploy, including
   failed ones, per the house `/status` page convention.

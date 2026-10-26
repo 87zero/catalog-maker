@@ -53,7 +53,11 @@ export async function build(source, output = path.join(source, 'public')) {
     await mkdir(path.dirname(destination), { recursive: true });
     if (layout.coverSize) {
       await sharp(entry.sourceImage)
-        .resize(layout.coverSize.width, layout.coverSize.height, { fit: 'cover', position: 'centre' })
+        .rotate()
+        .resize(layout.coverSize.width, layout.coverSize.height, {
+          fit: 'contain',
+          background: layout.coverSize.background || '#ffffff',
+        })
         .toFile(destination);
     } else {
       await copyFile(entry.sourceImage, destination);
